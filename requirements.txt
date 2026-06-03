@@ -1,7 +1,7 @@
 # ============================================================
 # Breakout DQN — Requirements
 # Universidad Nacional del Altiplano - Puno
-# Aprendizaje de Máquina
+# Agente autonomo
 # ============================================================
 # Instalación: pip install -r requirements.txt
 
