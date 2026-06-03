@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breakout DQN - Deep Q-Network | UNA Puno</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🎮</div>
+                <div class="logo-text">
+                    <h1>BREAKOUT DQN</h1>
+                    <p>Deep Q-Network • UNA Puno</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="header-btn" id="soundBtn" onclick="toggleSound()" title="Sonido">🔊</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="game-section">
+                <div class="game-wrapper">
+                    <div class="game-header">
+                        <div class="game-title">
+                            <span>🎯 AGENTE DQN</span>
+                            <span class="level-badge" id="levelBadge">NIVEL 1</span>
+                            <span class="live-badge" id="liveBadge">EN VIVO</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat-mini">
+                                <div class="stat-mini-label">Score</div>
+                                <div class="stat-mini-value" id="demoScore">0</div>
+                            </div>
+                            <div class="stat-mini">
+                                <div class="stat-mini-label">Vidas</div>
+                                <div class="stat-mini-value" id="demoLives">3</div>
+                            </div>
+                            <div class="stat-mini">
+                                <div class="stat-mini-label">Nivel</div>
+                                <div class="stat-mini-value" id="demoLevel">1</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="canvas-container">
+                        <canvas id="gameCanvas" width="700" height="600"></canvas>
+
+                        <div class="game-overlay" id="startOverlay">
+                            <div class="overlay-title" style="color: var(--primary)">BREAKOUT DQN</div>
+                            <div class="overlay-subtitle">Selecciona un nivel para comenzar</div>
+                            <div class="level-selector">
+                                <button class="level-btn level-1" onclick="startAtLevel(1)">
+                                    <span class="level-num">1</span>
+                                    <span class="level-name">Principiante</span>
+                                    <span class="level-info">5×8 ladrillos</span>
+                                </button>
+                                <button class="level-btn level-2" onclick="startAtLevel(2)">
+                                    <span class="level-num">2</span>
+                                    <span class="level-name">Intermedio</span>
+                                    <span class="level-info">6×8 ladrillos</span>
+                                </button>
+                                <button class="level-btn level-3" onclick="startAtLevel(3)">
+                                    <span class="level-num">3</span>
+                                    <span class="level-name">Experto</span>
+                                    <span class="level-info">7×8 ladrillos</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="game-overlay" id="levelUpOverlay">
+                            <div class="overlay-title levelup">¡NIVEL COMPLETADO!</div>
+                            <div class="overlay-subtitle" id="levelUpText">Preparando Nivel 2...</div>
+                        </div>
+
+                        <div class="game-overlay" id="gameOverOverlay">
+                            <div class="overlay-title gameover" id="gameOverTitle">GAME OVER</div>
+                            <div class="overlay-subtitle" id="gameOverText">Score Final: 0</div>
+                            <div class="level-selector" style="margin-top: 25px;">
+                                <button class="level-btn level-1" onclick="startAtLevel(1)">
+                                    <span class="level-num">1</span>
+                                    <span class="level-name">Reiniciar</span>
+                                </button>
+                                <button class="level-btn level-2" onclick="startAtLevel(2)">
+                                    <span class="level-num">2</span>
+                                    <span class="level-name">Nivel 2</span>
+                                </button>
+                                <button class="level-btn level-3" onclick="startAtLevel(3)">
+                                    <span class="level-num">3</span>
+                                    <span class="level-name">Nivel 3</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="game-overlay" id="victoryOverlay">
+                            <div class="overlay-title victory">¡VICTORIA TOTAL!</div>
+                            <div class="overlay-subtitle" id="victoryText">¡Completaste los 3 niveles!</div>
+                            <div class="level-selector" style="margin-top: 25px;">
+                                <button class="level-btn level-1" onclick="startAtLevel(1)">
+                                    <span class="level-num">1</span>
+                                    <span class="level-name">Jugar de nuevo</span>
+                                </button>
+                                <button class="level-btn level-3" onclick="startAtLevel(3)">
+                                    <span class="level-num">3</span>
+                                    <span class="level-name">Modo Experto</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-bar">
+                    <div class="ctrl-group">
+                        <button class="ctrl-btn ctrl-btn-primary" id="playBtn" onclick="startDemo()">▶️ PLAY</button>
+                        <button class="ctrl-btn ctrl-btn-secondary" id="pauseBtn" onclick="pauseDemo()" disabled>⏸️ PAUSA</button>
+                        <button class="ctrl-btn ctrl-btn-danger" id="stopBtn" onclick="stopDemo()" disabled>⏹️ STOP</button>
+                    </div>
+                    <div class="divider"></div>
+                    <span class="speed-label">VELOCIDAD:</span>
+                    <div class="ctrl-group">
+                        <button class="speed-btn active" data-speed="1" onclick="setSpeed(1)">1x</button>
+                        <button class="speed-btn" data-speed="2" onclick="setSpeed(2)">2x</button>
+                        <button class="speed-btn" data-speed="4" onclick="setSpeed(4)">4x</button>
+                        <button class="speed-btn" data-speed="5" onclick="setSpeed(5)">5x</button>
+                        <button class="speed-btn" data-speed="10" onclick="setSpeed(10)">10x</button>
+                        <button class="speed-btn" data-speed="20" onclick="setSpeed(20)">20x</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-panel" id="sidePanel">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalEpisodes">0</div>
+                        <div class="stat-label">Episodios</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="bestScore">0</div>
+                        <div class="stat-label">Best Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="victories">0</div>
+                        <div class="stat-label">Victorias</div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header"><div class="chart-icon reward">📉</div><span>Recompensa</span></div>
+                    <div class="chart-container"><canvas id="rewardChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div class="chart-icon score">🎮</div><span>Score</span></div>
+                    <div class="chart-container"><canvas id="scoreChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div class="chart-icon epsilon">🎲</div><span>Epsilon</span></div>
+                    <div class="chart-container"><canvas id="epsilonChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div class="chart-icon loss">📊</div><span>Loss</span></div>
+                    <div class="chart-container"><canvas id="lossChart"></canvas></div>
+                </div>
+
+                <div class="model-card">
+                    <h3>🧠 ARQUITECTURA DQN</h3>
+                    <div class="model-grid">
+                        <div class="model-item">
+                            <div class="model-item-label">Red</div>
+                            <div class="model-item-value">9→256→256→128→64→3</div>
+                        </div>
+                        <div class="model-item">
+                            <div class="model-item-label">Learning Rate</div>
+                            <div class="model-item-value">0.0005</div>
+                        </div>
+                        <div class="model-item">
+                            <div class="model-item-label">Gamma</div>
+                            <div class="model-item-value">0.99</div>
+                        </div>
+                        <div class="model-item">
+                            <div class="model-item-label">Batch</div>
+                            <div class="model-item-value">64</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="toggle-charts-btn" id="toggleChartsBtn" onclick="toggleSidePanel()">📊</button>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
