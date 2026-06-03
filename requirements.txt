@@ -1,0 +1,16 @@
+# ============================================================
+# Breakout DQN — Requirements
+# Universidad Nacional del Altiplano - Puno
+# Aprendizaje de Máquina
+# ============================================================
+# Instalación: pip install -r requirements.txt
+
+# Servidor web
+flask>=2.3.0
+
+# Deep Learning
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Datos y cálculo
+numpy>=1.24.0
